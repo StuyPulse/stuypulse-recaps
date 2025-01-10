@@ -29,10 +29,14 @@ export async function POST(request: Request) {
                 channel,
                 text: `<@${user}> has changed the prompt to ${prompt}`,
             })
-            return new Response("Success!", { status: 200 })
+            break
         case "/getprompt":
             const currentPrompt = await get("prompt")
-            return new Response(`The current prompt is: ${currentPrompt}`, { status: 200 })
+            await slack.chat.postMessage({
+                channel,
+                text: `The current prompt is: ${currentPrompt}`,
+            })
+            break
     }
 }
 
