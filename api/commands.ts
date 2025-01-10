@@ -23,10 +23,7 @@ export async function POST(request: Request) {
             if (!prompt || prompt.length < 50)
                 return new Response("Please provide a prompt with at least 50 characters.")
 
-            const successful = await changePrompt(prompt)
-
-            if (!successful)
-                return new Response("Error updating prompt :(", { status: 500 })
+            await changePrompt(prompt)
         
             await slack.chat.postMessage({
                 channel,
@@ -61,12 +58,9 @@ async function changePrompt(prompt: string) {
             },
         )
         const response = await updateEdgeConfig.json()
-        if (!response.ok)
-            return false
+        console.log(response)
 
     } catch (error) {
-        return false
+        console.log(error)
     }
-
-    return true
 }
