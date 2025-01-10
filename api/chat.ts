@@ -14,7 +14,6 @@ export async function sendGPTResponse(event: Event) {
 
     try {
         const prompts = await generatePromptFromMessage(text)
-        console.log(prompts[0].content)
 
         const gptResponse = await getGPTResponse(prompts)
 

@@ -3,6 +3,7 @@
     "private": true,
     "dependencies": {
         "@slack/web-api": "7.0.1",
+        "@vercel/edge-config": "^1.4.0",
         "openai": "4.26.0"
     },
     "devDependencies": {

@@ -1,5 +1,6 @@
 import OpenAI from "openai"
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions"
+import { get } from "@vercel/edge-config"
 
 const openai = new OpenAI()
 
@@ -11,11 +12,11 @@ export async function getGPTResponse(messages: ChatCompletionMessageParam[]) {
 }
 
 export async function generatePromptFromMessage(message: string) {
-    const customPrompt = process.env.CHATGPT_CUSTOM_PROMPT
+    const customPrompt = await get("prompt")
     return [
         {
             role: "user",
             content: `${customPrompt}${message.replace(`<@${process.env.SLACK_BOT_ID}>`, "")}`,
         },
-    ] as ChatCompletionMessageParam[];
+    ] as ChatCompletionMessageParam[]
 }

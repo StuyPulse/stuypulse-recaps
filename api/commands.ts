@@ -1,4 +1,5 @@
 import { WebClient } from "@slack/web-api"
+import { get } from "@vercel/edge-config"
 
 export const config = {
     maxDuration: 30,
@@ -14,16 +15,58 @@ export async function POST(request: Request) {
     console.log(`Command: ${commandName}`)
     console.log(`Argument: ${prompt}`)
 
-    if (!prompt || prompt.length < 50)
-        return new Response("Please provide a prompt with at least 50 characters.")
-
     const user = formData.get("user_id")?.toString()
     const channel = formData.get("channel_id")?.toString() || ""
 
-    await slack.chat.postMessage({
-        channel,
-        text: `<@${user}> has changed the prompt to ${prompt}`,
-    })
-    
-    return new Response("Success!", { status: 200 })
+    switch (commandName) {
+        case "/changeprompt":
+            if (!prompt || prompt.length < 50)
+                return new Response("Please provide a prompt with at least 50 characters.")
+
+            const successful = await changePrompt(prompt)
+
+            if (!successful)
+                return new Response("Error updating prompt :(", { status: 500 })
+        
+            await slack.chat.postMessage({
+                channel,
+                text: `<@${user}> has changed the prompt to ${prompt}`,
+            })
+            return new Response("Success!", { status: 200 })
+        case "/getprompt":
+            const currentPrompt = await get("prompt")
+            return new Response(`The current prompt is: ${currentPrompt}`, { status: 200 })
+    }
+}
+
+async function changePrompt(prompt: string) {
+    try {
+        const updateEdgeConfig = await fetch(
+            `https://api.vercel.com/v1/edge-config/${process.env.VERCEL_EDGE_CONFIG_ID}/items`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    items: [
+                        {
+                            operation: "update",
+                            key: "prompt",
+                            value: prompt,
+                        },
+                    ],
+                }),
+            },
+        )
+        const response = await updateEdgeConfig.json()
+        if (!response.ok)
+            return false
+
+    } catch (error) {
+        return false
+    }
+
+    return true
 }
