@@ -63,6 +63,7 @@ export async function POST(request: Request) {
                     const messages: String[] = []
                     
                     for (let recapChannel in recapChannels) {
+                        console.log(`current recap channel: ${recapChannel}`)
                         const response = await slack.conversations.history({
                             channel: recapChannel,
                             oldest: String(today.getTime() / 1000),
@@ -71,6 +72,8 @@ export async function POST(request: Request) {
                         for (let message in response.messages)
                             messages.push(message)
                     }
+
+                    console.log(`messages: ${messages}`)
 
                     await slack.chat.postMessage({
                         channel,
