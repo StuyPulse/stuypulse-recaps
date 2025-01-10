@@ -18,6 +18,9 @@ export async function POST(request: Request) {
     const user = formData.get("user_id")?.toString()
     const channel = formData.get("channel_id")?.toString() || ""
 
+    if (channel != process.env.SLACK_COMMANDS_CHANNEL_ID && user != process.env.SLACK_ADMIN_ID)
+        return new Response(`You can only use commands in <@${channel}>.`)
+
     switch (commandName) {
         case "/changeprompt":
             if (!prompt || prompt.length < 50)
@@ -27,14 +30,14 @@ export async function POST(request: Request) {
         
             await slack.chat.postMessage({
                 channel,
-                text: `<@${user}> has changed the prompt to:\n ${prompt}`,
+                text: `<@${user}> has changed the prompt to:\n${prompt}`,
             })
             break
         case "/getprompt":
             const currentPrompt = await get("prompt")
             await slack.chat.postMessage({
                 channel,
-                text: `The current prompt is:\n ${currentPrompt}`,
+                text: `The current prompt is:\n${currentPrompt}`,
             })
             break
     }
