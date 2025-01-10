@@ -52,8 +52,6 @@ export async function POST(request: Request) {
 
             if (!recapChannels)
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
-        
-            console.log(`recap channels: ${process.env.SLACK_RECAP_CHANNELS}, parsed: ${recapChannels}`)
 
             switch (dates!.length) {
                 case 0:
@@ -67,18 +65,26 @@ export async function POST(request: Request) {
                         console.log(`current recap channel: ${recapChannel}`)
                         const response = await slack.conversations.history({
                             channel: recapChannel,
-                            oldest: String(today.getTime() / 1000),
                         })
+
+                        console.log(response.messages)
 
                         response.messages?.forEach(message => messages.push(message.text!))
                     })
 
                     console.log(`messages: ${messages}`)
 
-                    await slack.chat.postMessage({
-                        channel,
-                        text: messages.join("\n")
-                    })
+                    if (messages.length == 0) {
+                        await slack.chat.postMessage({
+                            channel,
+                            text: "No messages found :(",
+                        })
+                    } else {
+                        await slack.chat.postMessage({
+                            channel,
+                            text: messages.join("\n")
+                        })
+                    }
                     
                     break
                 case 1:
