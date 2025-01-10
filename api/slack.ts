@@ -5,9 +5,11 @@ export const config = {
 }
 
 export async function POST(request: Request) {
-    const rawBody = await request.text()
-    const body = JSON.parse(rawBody)
+    const body = await request.json()
     const requestType = body.type
+
+    console.log(`Request type: ${requestType}`)
+    console.log(`Body: ${body}`)
 
     if (requestType === "url_verification")
         return new Response(body.challenge, { status: 200 })
