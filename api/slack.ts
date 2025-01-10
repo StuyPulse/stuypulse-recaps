@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     if (requestType === "event_callback") {
         const eventType = body.event.type
-        if (eventType === "app_mention") {
+        if (eventType === "app_mention" || (eventType == "message" && body.event.user == process.env.SLACK_ADMIN_ID)) {
             await sendGPTResponse(body.event)
             return new Response("Success!", { status: 200 })
         }
