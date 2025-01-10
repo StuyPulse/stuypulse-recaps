@@ -43,9 +43,10 @@ export async function POST(request: Request) {
         case "/recap":
             const dates = text?.length == 0 ? [] : text?.split(" ")
             console.log(`input: ${text}, parsed dates: ${dates}`)
-            for (let date in dates)
+            dates?.forEach(date => {
                 if (!/^\d{2}-\d{2}-\d{2}$/.test(date))
                     return new Response(`Please provide all dates in the format MM-DD-YY. Problematic parameter: ${date}`)
+            })
             
             const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(" ")
 
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
                     
                     const messages: String[] = []
                     
-                    for (let recapChannel in recapChannels) {
+                    recapChannels.forEach(async (recapChannel) => {
                         console.log(`current recap channel: ${recapChannel}`)
                         const response = await slack.conversations.history({
                             channel: recapChannel,
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
 
                         for (let message in response.messages)
                             messages.push(message)
-                    }
+                    })
 
                     console.log(`messages: ${messages}`)
 
