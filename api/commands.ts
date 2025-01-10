@@ -70,8 +70,7 @@ export async function POST(request: Request) {
                             oldest: String(today.getTime() / 1000),
                         })
 
-                        for (let message in response.messages)
-                            messages.push(message)
+                        response.messages?.forEach(message => messages.push(message.text!))
                     })
 
                     console.log(`messages: ${messages}`)
