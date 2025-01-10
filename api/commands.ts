@@ -11,9 +11,9 @@ export async function POST(request: Request) {
     const formData = await request.formData()
 
     const commandName = formData.get("command")?.toString()
-    const prompt = formData.get("text")?.toString().trim()
+    const text = formData.get("text")?.toString().trim()
     console.log(`Command: ${commandName}`)
-    console.log(`Argument: ${prompt}`)
+    console.log(`Argument: ${text}`)
 
     const user = formData.get("user_id")?.toString()
     const channel = formData.get("channel_id")?.toString() || ""
@@ -23,14 +23,14 @@ export async function POST(request: Request) {
 
     switch (commandName) {
         case "/changeprompt":
-            if (!prompt || prompt.length < 50)
+            if (!text || text.length < 50)
                 return new Response("Please provide a prompt with at least 50 characters.")
 
-            await changePrompt(prompt)
+            await changePrompt(text)
         
             await slack.chat.postMessage({
                 channel,
-                text: `<@${user}> has changed the prompt to:\n${prompt}`,
+                text: `<@${user}> has changed the prompt to:\n${text}`,
             })
             break
         case "/getprompt":
@@ -40,6 +40,49 @@ export async function POST(request: Request) {
                 text: `The current prompt is:\n${currentPrompt}`,
             })
             break
+        case "/recap":
+            const dates = text?.split(" ") || [];
+            for (let date in dates)
+                if (!/^\d{2}-\d{2}-\d{2}$/.test(date))
+                    return new Response(`Please provide all dates in the format MM-DD-YY. Problematic parameter: ${date}`)
+            
+            const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(",")
+
+            if (!recapChannels)
+                return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
+
+            switch (dates.length) {
+                case 0:
+                    // get today's recaps
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    
+                    const messages: String[] = []
+                    
+                    for (let recapChannel in recapChannels) {
+                        const response = await slack.conversations.history({
+                            channel: recapChannel,
+                            oldest: String(today.getTime() / 1000),
+                        })
+
+                        for (let message in response.messages)
+                            messages.push(message)
+                    }
+
+                    await slack.chat.postMessage({
+                        channel,
+                        text: messages.join("\n")
+                    })
+                    
+                    break
+                case 1:
+                    // get specific day's recaps
+                    break
+                default:
+                    // ignore extraneous params
+                    // get range of recaps (exclusive for second param)
+                    break
+            }
     }
 }
 
