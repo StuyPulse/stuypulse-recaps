@@ -51,6 +51,8 @@ export async function POST(request: Request) {
 
             if (!recapChannels)
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
+        
+            console.log(recapChannels)
 
             switch (dates!.length) {
                 case 0:
