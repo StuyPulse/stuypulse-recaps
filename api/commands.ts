@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             })
             break
         case "/recap":
-            const dates = text?.length == 0 ? [] : text?.split(" ")
+            const dates = (text?.length == 0 ? [] : text?.split(" ")) || []
             for (let date in dates)
                 if (!/^\d{2}-\d{2}-\d{2}$/.test(date))
                     return new Response(`Please provide all dates in the format MM-DD-YY. Problematic parameter: ${date}`)
