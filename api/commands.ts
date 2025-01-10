@@ -41,7 +41,8 @@ export async function POST(request: Request) {
             })
             break
         case "/recap":
-            const dates = (text?.length == 0 ? [] : text?.split(" ")) || []
+            const dates = text?.length == 0 ? [] : text?.split(" ")
+            console.log(text, dates)
             for (let date in dates)
                 if (!/^\d{2}-\d{2}-\d{2}$/.test(date))
                     return new Response(`Please provide all dates in the format MM-DD-YY. Problematic parameter: ${date}`)
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
             if (!recapChannels)
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
 
-            switch (dates.length) {
+            switch (dates!.length) {
                 case 0:
                     // get today's recaps
                     const today = new Date()
