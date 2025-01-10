@@ -42,17 +42,17 @@ export async function POST(request: Request) {
             break
         case "/recap":
             const dates = text?.length == 0 ? [] : text?.split(" ")
-            console.log(text, dates)
+            console.log(`input: ${text}, parsed dates: ${dates}`)
             for (let date in dates)
                 if (!/^\d{2}-\d{2}-\d{2}$/.test(date))
                     return new Response(`Please provide all dates in the format MM-DD-YY. Problematic parameter: ${date}`)
             
-            const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(",")
+            const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(" ")
 
             if (!recapChannels)
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
         
-            console.log(recapChannels)
+            console.log(`recap channels: ${recapChannels}`)
 
             switch (dates!.length) {
                 case 0:
