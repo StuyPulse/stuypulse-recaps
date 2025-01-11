@@ -126,20 +126,19 @@ async function fetchMessages(recapChannels: string[], dates: string[]) {
             const begin = new Date(dates[0])
             oldest = String(Math.floor(begin.getTime() / 1000))
             const end = new Date(dates[1])
-            latest = String(Math.floor(end.getTime() / 1000))
+            const inclusiveEnd = new Date(end)
+            inclusiveEnd.setDate(end.getDate() + 1)
+            latest = String(Math.floor(inclusiveEnd.getTime() / 1000))
             break
     }
 
     for (let recapChannel of recapChannels) {
-        console.log(`current recap channel: ${recapChannel}`)
         const response = await slack.conversations.history({
             channel: recapChannel,
             oldest,
             latest,
         })
         
-        console.log(`${recapChannel}: ${response.messages}`)
-
         response.messages?.forEach(message => {
             messages.push(message.text!)
         })
