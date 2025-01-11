@@ -5,16 +5,15 @@ const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
 
 type Event = {
     channel: string
-    text: string
     ts: string | null
 }
 
 export async function sendGPTResponse(event: Event) {
-    const { channel, text, ts } = event
+    const { channel, ts } = event
 
     try {
-        const prompts = await generatePromptFromMessage(text)
-
+        const messages = await fetchMessages()
+        const prompts = await generatePromptFromMessage(messages)
         const gptResponse = await getGPTResponse(prompts)
 
         await slack.chat.postMessage({
@@ -31,4 +30,27 @@ export async function sendGPTResponse(event: Event) {
             })
         }
     }
+}
+
+async function fetchMessages() {
+    const messages: string[] = []
+
+    const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(" ") || []
+
+    const today = new Date()
+    today.setHours(0)
+    const oldest = String(Math.floor(today.getTime() / 1000))
+
+    for (let recapChannel of recapChannels) {
+        const response = await slack.conversations.history({
+            channel: recapChannel,
+            oldest,
+        })
+        
+        response.messages?.forEach(message => {
+            messages.push(message.text!)
+        })
+    }
+
+    return messages.join("\n")
 }
