@@ -108,7 +108,6 @@ async function fetchMessages(recapChannels: string[], dates: string[]) {
             const today = new Date()
             today.setHours(0, 0, 0, 0)
             oldest = String(Math.floor(today.getTime() / 1000))
-            latest = String(Math.floor((new Date(today.getDate() + 1)).getTime() / 1000))
         case 1:
             // get that day's messages
             const day = new Date(dates[0])
