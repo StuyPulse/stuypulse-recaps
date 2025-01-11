@@ -55,23 +55,8 @@ export async function POST(request: Request) {
 
             switch (dates!.length) {
                 case 0:                
-                    const messages: String[] = []
+                    const messages = await fetchMessages(recapChannels)
                     
-                    recapChannels.forEach(async (recapChannel) => {
-                        console.log(`current recap channel: ${recapChannel}`)
-                        const response = await slack.conversations.history({
-                            channel: recapChannel,
-                            oldest: "1736485200"
-                        })
-                        
-                        console.log(`${recapChannel}: ${response.messages}`)
-
-                        response.messages?.forEach(message => {
-                            console.log(message.text)
-                            messages.push(message.text!)
-                        })
-                    })
-
                     console.log(`messages: ${messages}`)
 
                     if (messages.length == 0) {
@@ -125,4 +110,25 @@ async function changePrompt(prompt: string) {
     } catch (error) {
         console.log(error)
     }
+}
+
+async function fetchMessages(recapChannels: string[]) {
+    const messages: string[] = []
+
+    recapChannels.forEach(async (recapChannel) => {
+        console.log(`current recap channel: ${recapChannel}`)
+        const response = await slack.conversations.history({
+            channel: recapChannel,
+            oldest: "1736485200"
+        })
+        
+        console.log(`${recapChannel}: ${response.messages}`)
+
+        response.messages?.forEach(message => {
+            console.log(message.text)
+            messages.push(message.text!)
+        })
+    })
+
+    return messages
 }
