@@ -1,5 +1,7 @@
 import { WebClient } from "@slack/web-api"
 import { get } from "@vercel/edge-config"
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions"
+import { sendGPTResponse } from "./chat"
 
 export const config = {
     maxDuration: 30,
@@ -61,10 +63,7 @@ export async function POST(request: Request) {
                     text: "No messages found :(",
                 })
             } else {
-                await slack.chat.postMessage({
-                    channel,
-                    text: messages.join("\n")
-                })
+                await sendGPTResponse({ channel, text: messages.join("\n"), ts: null })
             }
             break
     }
