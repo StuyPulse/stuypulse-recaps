@@ -53,32 +53,18 @@ export async function POST(request: Request) {
             if (!recapChannels)
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
 
-            switch (dates!.length) {
-                case 0:                
-                    const messages = await fetchMessages(recapChannels)
-                    
-                    console.log(`messages: ${messages}`)
+            const messages = await fetchMessages(recapChannels, dates!)
 
-                    if (messages.length == 0) {
-                        await slack.chat.postMessage({
-                            channel,
-                            text: "No messages found :(",
-                        })
-                    } else {
-                        await slack.chat.postMessage({
-                            channel,
-                            text: messages.join("\n")
-                        })
-                    }
-                    
-                    break
-                case 1:
-                    // get specific day's recaps
-                    break
-                default:
-                    // ignore extraneous params
-                    // get range of recaps (exclusive for second param)
-                    break
+            if (messages.length == 0) {
+                await slack.chat.postMessage({
+                    channel,
+                    text: "No messages found :(",
+                })
+            } else {
+                await slack.chat.postMessage({
+                    channel,
+                    text: messages.join("\n")
+                })
             }
     }
 }
@@ -112,20 +98,41 @@ async function changePrompt(prompt: string) {
     }
 }
 
-async function fetchMessages(recapChannels: string[]) {
+async function fetchMessages(recapChannels: string[], dates: string[]) {
     const messages: string[] = []
+
+    let oldest, latest
+    switch (dates.length) {
+        case 0:
+            // get today's messages
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            oldest = String(Math.floor(today.getTime() / 1000))
+            latest = String(Math.floor((new Date(today.getDate() + 1)).getTime() / 1000))
+        case 1:
+            // get that day's messages
+            const day = new Date(dates[0])
+            oldest = String(Math.floor(day.getTime() / 1000))
+            latest = String(Math.floor((new Date(day.getDate() + 1)).getTime() / 1000))
+        default:
+            // range
+            const begin = new Date(dates[0])
+            const end = new Date(dates[1])
+            oldest = String(Math.floor(begin.getTime() / 1000))
+            latest = String(Math.floor((new Date(end.getDate() + 1)).getTime() / 1000))
+    }
 
     for (let recapChannel of recapChannels) {
         console.log(`current recap channel: ${recapChannel}`)
         const response = await slack.conversations.history({
             channel: recapChannel,
-            oldest: "1736485200"
+            oldest,
+            latest,
         })
         
         console.log(`${recapChannel}: ${response.messages}`)
 
         response.messages?.forEach(message => {
-            console.log(message.text)
             messages.push(message.text!)
         })
     }
