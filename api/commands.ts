@@ -115,7 +115,7 @@ async function changePrompt(prompt: string) {
 async function fetchMessages(recapChannels: string[]) {
     const messages: string[] = []
 
-    recapChannels.forEach(async (recapChannel) => {
+    for (let recapChannel of recapChannels) {
         console.log(`current recap channel: ${recapChannel}`)
         const response = await slack.conversations.history({
             channel: recapChannel,
@@ -128,7 +128,7 @@ async function fetchMessages(recapChannels: string[]) {
             console.log(message.text)
             messages.push(message.text!)
         })
-    })
+    }
 
     return messages
 }
