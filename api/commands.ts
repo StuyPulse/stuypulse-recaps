@@ -54,11 +54,7 @@ export async function POST(request: Request) {
                 return new Response(`Recap channels not found. Please contact <@${process.env.SLACK_ADMIN_ID}>.`)
 
             switch (dates!.length) {
-                case 0:
-                    // get today's recaps
-                    const today = new Date()
-                    today.setHours(0, 0, 0, 0)
-                    
+                case 0:                
                     const messages: String[] = []
                     
                     recapChannels.forEach(async (recapChannel) => {
@@ -67,9 +63,10 @@ export async function POST(request: Request) {
                             channel: recapChannel,
                         })
 
-                        console.log(response.messages)
-
-                        response.messages?.forEach(message => messages.push(message.text!))
+                        response.messages?.forEach(message => {
+                            console.log(message.text)
+                            messages.push(message.text!)
+                        })
                     })
 
                     console.log(`messages: ${messages}`)
