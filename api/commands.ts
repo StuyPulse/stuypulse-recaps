@@ -108,17 +108,22 @@ async function fetchMessages(recapChannels: string[], dates: string[]) {
             const today = new Date()
             today.setHours(0, 0, 0, 0)
             oldest = String(Math.floor(today.getTime() / 1000))
+            const tmr = new Date(today)
+            tmr.setDate(today.getDate() + 1)
+            latest = String(Math.floor(tmr.getTime() / 1000))
         case 1:
             // get that day's messages
             const day = new Date(dates[0])
             oldest = String(Math.floor(day.getTime() / 1000))
-            latest = String(Math.floor((new Date(day.getDate() + 1)).getTime() / 1000))
+            const next = new Date(day)
+            next.setDate(day.getDate() + 1)
+            latest = String(Math.floor(next.getTime() / 1000))
         default:
             // range
             const begin = new Date(dates[0])
-            const end = new Date(dates[1])
             oldest = String(Math.floor(begin.getTime() / 1000))
-            latest = String(Math.floor((new Date(end.getDate() + 1)).getTime() / 1000))
+            const end = new Date(dates[1])
+            latest = String(Math.floor(end.getTime() / 1000))
     }
 
     for (let recapChannel of recapChannels) {
