@@ -66,6 +66,7 @@ export async function POST(request: Request) {
                     text: messages.join("\n")
                 })
             }
+            break
     }
 }
 
@@ -111,6 +112,7 @@ async function fetchMessages(recapChannels: string[], dates: string[]) {
             const tmr = new Date(today)
             tmr.setDate(today.getDate() + 1)
             latest = String(Math.floor(tmr.getTime() / 1000))
+            break
         case 1:
             // get that day's messages
             const day = new Date(dates[0])
@@ -118,12 +120,14 @@ async function fetchMessages(recapChannels: string[], dates: string[]) {
             const next = new Date(day)
             next.setDate(day.getDate() + 1)
             latest = String(Math.floor(next.getTime() / 1000))
+            break
         default:
             // range
             const begin = new Date(dates[0])
             oldest = String(Math.floor(begin.getTime() / 1000))
             const end = new Date(dates[1])
             latest = String(Math.floor(end.getTime() / 1000))
+            break
     }
 
     for (let recapChannel of recapChannels) {
