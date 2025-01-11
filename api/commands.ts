@@ -61,7 +61,10 @@ export async function POST(request: Request) {
                         console.log(`current recap channel: ${recapChannel}`)
                         const response = await slack.conversations.history({
                             channel: recapChannel,
+                            oldest: "1736485200"
                         })
+                        
+                        console.log(`${recapChannel}: ${response.messages}`)
 
                         response.messages?.forEach(message => {
                             console.log(message.text)
