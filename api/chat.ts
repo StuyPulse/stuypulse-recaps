@@ -19,14 +19,8 @@ export async function sendGPTResponse(event: Event) {
 
     try {
         const thread = await slack.conversations.replies({ channel, ts })
-        if (thread.messages?.length != 1) {
-            await slack.chat.postMessage({
-                channel,
-                text: "Please mention me outside the thread. I can only reply to a thread with no replies to prevent sending multiple responses.",
-                thread_ts: ts,
-            })
+        if (thread.messages?.length != 1) 
             return
-        }
 
         const messages = await fetchMessages()
         const prompts = await generatePromptFromMessage(messages)
