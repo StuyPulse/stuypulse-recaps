@@ -9,6 +9,14 @@ export async function POST(request: Request) {
     const body = JSON.parse(rawBody)
     const requestType = body.type
 
+    const retryReason = request.headers.get("x-slack-retry-reason")
+    const retryAttempt = request.headers.get("x-slack-retry-num")
+
+    if (retryReason || retryAttempt) {
+        console.log(`Ignoring retry event: reason=${retryReason}, attempt=${retryAttempt}`)
+        return new Response("Retry ignored", { status: 200 })
+    }
+
     console.log(`Request type: ${requestType}`)
     console.log(`Raw body: ${rawBody}`);
 
@@ -18,9 +26,7 @@ export async function POST(request: Request) {
     if (requestType === "event_callback") {
         const eventType = body.event.type
         if (eventType === "app_mention" || (eventType == "message" && body.event.user == process.env.SLACK_ADMIN_ID)) {
-            (async () => { await sendGPTResponse(body.event)})().catch((error) => {
-                console.error('Error processing GPT response:', error)
-            })
+            await sendGPTResponse(body.event)
         }
     }
 
