@@ -18,7 +18,9 @@ export async function POST(request: Request) {
     if (requestType === "event_callback") {
         const eventType = body.event.type
         if (eventType === "app_mention" || (eventType == "message" && body.event.user == process.env.SLACK_ADMIN_ID)) {
-            await sendGPTResponse(body.event)
+            setImmediate(() => {
+                sendGPTResponse(body.event).catch(err => console.error(`Error handling event: ${err}`));
+            })
         }
     }
 
