@@ -1,5 +1,11 @@
 import { WebClient } from "@slack/web-api"
 import { getGPTResponse, generatePromptFromMessage } from "./openai"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
 
@@ -47,9 +53,8 @@ async function fetchMessages() {
 
     const recapChannels = process.env.SLACK_RECAP_CHANNELS?.split(" ") || []
 
-    const today = new Date()
-    today.setHours(0)
-    const oldest = String(Math.floor(today.getTime() / 1000))
+    const midnightEST = dayjs().tz('America/New_York').startOf('day').utc()
+    const oldest = String(midnightEST.unix())
 
     for (let recapChannel of recapChannels) {
         const response = await slack.conversations.history({

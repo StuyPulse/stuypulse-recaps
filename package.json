@@ -4,6 +4,7 @@
     "dependencies": {
         "@slack/web-api": "7.0.1",
         "@vercel/edge-config": "^1.4.0",
+        "dayjs": "^1.11.13",
         "openai": "4.26.0"
     },
     "devDependencies": {
